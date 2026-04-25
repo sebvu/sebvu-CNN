@@ -8,8 +8,8 @@ def main():
     # hyprparameters
     EPOCHS = 20
     LEARNING_RATE = 0.0001
-    BATCH_SIZE=16
-    KERNEL_SIZE=5
+    BATCH_SIZE=32
+    KERNEL_SIZE=3
     ###
 
     df = pd.read_csv("data/images.csv") # training data
