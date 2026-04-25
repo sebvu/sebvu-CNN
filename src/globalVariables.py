@@ -1,9 +1,10 @@
 import torch
+import os
 
 # global variables
 
-DATA_CSV_PATH="data-subset/images.csv"
-MODELS_PATH="models/"
+DATA_CSV_PATH=os.path.join(os.getcwd(), "data", "images.csv")
+MODELS_PATH=os.path.join(os.getcwd(), "models")
 
 # hyprparameters
 
