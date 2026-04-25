@@ -128,11 +128,11 @@ def main():
     val_dataset = ClothingDataset(val_df, labels)
     test_dataset = ClothingDataset(test_df, labels)
     
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=8)
-    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False, num_workers=8)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False, num_workers=8)
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
-    trainer = Trainer(50, 0.001) # instantiate model trainer, and train
+    trainer = Trainer(50, 0.0001) # instantiate model trainer, and train
 
     trainer.train(train_loader, val_loader)
 
