@@ -6,8 +6,9 @@ from sklearn.metrics import accuracy_score
 from CNNModel import CNNModel
 
 class ClothingClassificationAgent:
-    def __init__(self, epochs: int, learning_rate: float, kernel_size, is_deep: bool = False):
-        self.model = CNNModel(kernel_size, is_deep)
+    def __init__(self, epochs: int, learning_rate: float, kernel_size, *, is_deep: bool = False, device: None):
+        self.device = device or torch.device("cpu") # cuda if available, else just use cpu
+        self.model = CNNModel(kernel_size, is_deep).to(self.device) # move model to device
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
         self.loss_fn = nn.CrossEntropyLoss()
         self.epochs = epochs
@@ -23,6 +24,7 @@ class ClothingClassificationAgent:
 
         with torch.no_grad(): # no gradient tracking
             for X_batch, y_batch in dataloader:
+                X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device) # allocate res. to device
                 y_hat = self.model(X_batch)
                 preds = y_hat.argmax(dim=1)
                 all_preds.extend(preds.tolist())
@@ -36,6 +38,7 @@ class ClothingClassificationAgent:
             for X_batch, y_batch in dataloader:
                 # X_batch is the 4D input of the image tensors that were transformed
                 # y_batch is the answer key!
+                X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device) # allocate res to device
 
                 # forward pass, produces a prediction
                 y_hat = self.model(X_batch)

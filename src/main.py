@@ -1,3 +1,4 @@
+import torch
 import pandas as pd
 from ClothingDataset import ClothingDataset
 from torch.utils.data import DataLoader
@@ -12,6 +13,10 @@ def main():
     BATCH_SIZE=32
     KERNEL_SIZE=3
     ###
+
+    # figure out training device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"using device: {device}")
 
     df = pd.read_csv(DATA_CSV_PATH) # training data
     df = df[df["label"] != "Not sure"] # filter out the "Not sure" label
@@ -38,12 +43,12 @@ def main():
     train_loader_noaug = DataLoader(train_dataset_noaug, batch_size=BATCH_SIZE, shuffle=True)
 
     # # not_deep_noaug
-    CC_not_deep_noaug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=False) 
+    CC_not_deep_noaug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=False, device=device) 
     CC_not_deep_noaug.train(train_loader_noaug, val_loader, save_path=f"{MODELS_PATH}not_deep_noaug/")
     interpretResults(CC_not_deep_noaug, test_dataset, test_loader, test_name="not_deep_noaug", save_only_if_better=True)
     
     # deep_noaug
-    CC_deep_noaug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=True)
+    CC_deep_noaug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=True, device=device)
     CC_deep_noaug.train(train_loader_noaug, val_loader, save_path=f"{MODELS_PATH}deep_noaug/")
     interpretResults(CC_deep_noaug, test_dataset, test_loader, test_name="deep_noaug", save_only_if_better=True)
 
@@ -52,12 +57,12 @@ def main():
     train_loader_aug = DataLoader(train_dataset_aug, batch_size=BATCH_SIZE, shuffle=True)
 
     # not_deep_aug
-    CC_not_deep_aug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=False)
+    CC_not_deep_aug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=False, device=device)
     CC_not_deep_aug.train(train_loader_aug, val_loader, save_path=f"{MODELS_PATH}not_deep_aug/")
     interpretResults(CC_not_deep_aug, test_dataset, test_loader, test_name="not_deep_aug", save_only_if_better=True)
 
     # deep_aug
-    CC_deep_aug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=True)
+    CC_deep_aug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=True, device=device)
     CC_deep_aug.train(train_loader_aug, val_loader, save_path=f"{MODELS_PATH}deep_aug/")
     interpretResults(CC_deep_aug, test_dataset, test_loader, test_name="deep_aug", save_only_if_better=True)
 
