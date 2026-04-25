@@ -51,7 +51,7 @@ def main():
     CC_not_deep_noaug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=False, device=DEVICE) 
     CC_not_deep_noaug.train(train_loader_noaug, val_loader, save_path=f"{MODELS_PATH}not_deep_noaug/")
     interpretResults(CC_not_deep_noaug, test_dataset, test_loader, test_name="not_deep_noaug", save_only_if_better=True)
-    
+
     # deep_noaug
     CC_deep_noaug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=True, device=DEVICE)
     CC_deep_noaug.train(train_loader_noaug, val_loader, save_path=f"{MODELS_PATH}deep_noaug/")

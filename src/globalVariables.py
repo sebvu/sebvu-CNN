@@ -7,7 +7,7 @@ MODELS_PATH="models/"
 
 # hyprparameters
 
-EPOCHS = 3
+EPOCHS = 20
 LEARNING_RATE = 0.0001
 BATCH_SIZE=32
 KERNEL_SIZE=3
