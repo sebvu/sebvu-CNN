@@ -6,9 +6,9 @@ from dataVisualization import displayResults
 
 def main():
     # hyprparameters
-    EPOCHS = 20
+    EPOCHS = 60
     LEARNING_RATE = 0.0001
-    BATCH_SIZE=32
+    BATCH_SIZE=16
     KERNEL_SIZE=3
     ###
 
@@ -39,14 +39,14 @@ def main():
     # not_deep_noaug
     CC_not_deep_noaug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=False) 
     CC_not_deep_noaug.train(train_loader_noaug, val_loader)
-    true_labels_not_deep, predictions_not_deep = CC_not_deep_noaug.evaluate(test_loader)
-    displayResults(true_labels_not_deep, predictions_not_deep, test_dataset)
+    true_labels_not_deep_noaug, predictions_not_deep_noaug = CC_not_deep_noaug.evaluate(test_loader)
+    displayResults(true_labels_not_deep_noaug, predictions_not_deep_noaug, test_dataset, test_name="not_deep_noaug")
 
     # deep_noaug
     CC_deep_noaug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=True)
     CC_deep_noaug.train(train_loader_noaug, val_loader)
-    true_labels_deep, predictions_deep = CC_deep_noaug.evaluate(test_loader)
-    displayResults(true_labels_deep, predictions_deep, test_dataset)
+    true_labels_deep_noaug, predictions_deep_noaug = CC_deep_noaug.evaluate(test_loader)
+    displayResults(true_labels_deep_noaug, predictions_deep_noaug, test_dataset, test_name="deep_noaug")
 
     # augmentation
     train_dataset_aug = ClothingDataset(train_df, labels, is_augmented=True)
@@ -55,14 +55,14 @@ def main():
     # not_deep_aug
     CC_not_deep_aug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=False)
     CC_not_deep_aug.train(train_loader_aug, val_loader)
-    true_labels_not_deep, predictions_not_deep = CC_not_deep_aug.evaluate(test_loader)
-    displayResults(true_labels_not_deep, predictions_not_deep, test_dataset)
+    true_labels_not_deep_aug, predictions_not_deep_aug = CC_not_deep_aug.evaluate(test_loader)
+    displayResults(true_labels_not_deep_aug, predictions_not_deep_aug, test_dataset, test_name="not_deep_aug")
 
     # deep_aug
     CC_deep_aug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=True)
     CC_deep_aug.train(train_loader_aug, val_loader)
-    true_labels_deep, predictions_deep = CC_deep_aug.evaluate(test_loader)
-    displayResults(true_labels_deep, predictions_deep, test_dataset)
+    true_labels_deep_aug, predictions_deep_aug = CC_deep_aug.evaluate(test_loader)
+    displayResults(true_labels_deep_aug, predictions_deep_aug, test_dataset, test_name="deep_aug")
 
 if __name__=="__main__":
     main()
