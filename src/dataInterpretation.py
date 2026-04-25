@@ -2,18 +2,28 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 from pathlib import Path
 from filePaths import MODELS_PATH
 import matplotlib.pyplot as plt
+import torch
 import os
 
 def getConsistentAccuracyFormat(acc, *, with_space: bool = False) -> str:
     return f"accuracy: {acc:.3f}" if not with_space else f"accuracy: {acc:.3f}\n\n"
 
-def overwriteModelDataInFolder(acc, report, test_name, txt_path, *, run_dir):
+def overwriteModelDataInFolder(model, acc, report, test_name, txt_path, *, run_dir):
+    # overwrite txt_path file
     with open(txt_path, "w") as f:
         f.write(getConsistentAccuracyFormat(acc, with_space=True))
         f.write(report)
-        plt.savefig(os.path.join(run_dir, f"{test_name}_confusion_matrix.png"))
 
-def interpretResults(true_labels, predictions, test_dataset, *, test_name="model", save_only_if_better: bool = False, display_confusion_matrix: bool = False):
+    # overwrite confusion matrix
+    plt.savefig(os.path.join(run_dir, f"{test_name}_confusion_matrix.png"))
+
+    # overwrite model
+    torch.save(model.state_dict(), f"{run_dir}/{test_name}_model.pt")
+
+def interpretResults(agent, test_dataset, test_loader, *, test_name="model", save_only_if_better: bool = False, display_confusion_matrix: bool = False):
+
+    true_labels, predictions = agent.evaluate(test_loader) # evaluate model against test_loader
+
     new_acc = accuracy_score(true_labels, predictions)
     report = classification_report(true_labels, predictions, target_names=list(test_dataset.labels.keys()))
 
@@ -40,7 +50,7 @@ def interpretResults(true_labels, predictions, test_dataset, *, test_name="model
             old_acc = float(f.readline().split(" ")[1]) # formatting should stay consistent with a space seperating accuracy and the number
             
         if new_acc >= old_acc: # rewrite old stuff
-            print(f"overwriting old {run_dir}/{txt_path} since accuracy is better this run")
-            overwriteModelDataInFolder(new_acc, report, test_name, txt_path, run_dir=run_dir)
+            print(f"overwriting old {run_dir}/{test_name}/ since accuracy is better this run")
+            overwriteModelDataInFolder(agent.model, new_acc, report, test_name, txt_path, run_dir=run_dir)
 
     plt.close()
