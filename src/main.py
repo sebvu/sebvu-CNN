@@ -28,11 +28,11 @@ def main():
     learning_rate = 0.0001
 
     # no augmentation
-    train_dataset_noaug = ClothingDataset(train_df, labels)
+    train_dataset_noaug = ClothingDataset(train_df, labels, is_augmented=False)
     train_loader_noaug = DataLoader(train_dataset_noaug, batch_size=32, shuffle=True)
 
     # not_deep 
-    CC_not_deep = ClothingClassificationAgent(epochs, learning_rate) # instantiate model trainer, and train
+    CC_not_deep = ClothingClassificationAgent(epochs, learning_rate, is_deep=False) 
     CC_not_deep.train(train_loader_noaug, val_loader)
     true_labels_not_deep, predictions_not_deep = CC_not_deep.evaluate(test_loader)
     displayResults(true_labels_not_deep, predictions_not_deep, test_dataset)
@@ -44,11 +44,11 @@ def main():
     displayResults(true_labels_deep, predictions_deep, test_dataset)
 
     # augmentation
-    train_dataset_aug = ClothingDataset(train_df, labels, True)
+    train_dataset_aug = ClothingDataset(train_df, labels, is_augmented=True)
     train_loader_aug = DataLoader(train_dataset_aug, batch_size=32, shuffle=True)
 
     # not_deep 
-    CC_not_deep = ClothingClassificationAgent(epochs, learning_rate) # instantiate model trainer, and train
+    CC_not_deep = ClothingClassificationAgent(epochs, learning_rate, is_deep=False)
     CC_not_deep.train(train_loader_aug, val_loader)
     true_labels_not_deep, predictions_not_deep = CC_not_deep.evaluate(test_loader)
     displayResults(true_labels_not_deep, predictions_not_deep, test_dataset)

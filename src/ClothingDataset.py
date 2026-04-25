@@ -3,11 +3,11 @@ from torch.utils.data import Dataset
 from PIL import Image
 
 class ClothingDataset(Dataset):
-    def __init__(self, df, labels, is_training: bool = False):
+    def __init__(self, df, labels, is_augmented: bool = False):
         self.df = df
         self.labels = labels
 
-        if not is_training: 
+        if not is_augmented: 
             self.transform = transforms.Compose([
                 transforms.Resize((128, 128)), 
                 transforms.ToTensor(), 
