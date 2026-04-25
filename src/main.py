@@ -80,7 +80,7 @@ class Trainer:
         return all_labels, all_preds
 
 
-    def train(self, dataloader: DataLoader) -> None:
+    def train(self, dataloader: DataLoader, val_loader: DataLoader) -> None:
         for epoch in range(self.epochs):
             for X_batch, y_batch in dataloader:
                 # X_batch is the 4D input of the image tensors that were transformed
@@ -106,7 +106,7 @@ class Trainer:
                 self.optimizer.step()
 
             # after all batches, check validation loss
-            val_labels, val_preds = self.evaluate(dataloader)
+            val_labels, val_preds = self.evaluate(val_loader)
             val_acc = accuracy_score(val_labels, val_preds)
             print(f"epoch {epoch+1}/{self.epochs} — val_acc: {val_acc:.3f}")
             self.model.train()  # switch back to train mode after evaluate
@@ -128,13 +128,13 @@ def main():
     val_dataset = ClothingDataset(val_df, labels)
     test_dataset = ClothingDataset(test_df, labels)
     
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=8)
+    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False, num_workers=8)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False, num_workers=8)
 
     trainer = Trainer(50, 0.001) # instantiate model trainer, and train
 
-    trainer.train(train_loader)
+    trainer.train(train_loader, val_loader)
 
     true_labels, predictions = trainer.evaluate(test_loader)
 
