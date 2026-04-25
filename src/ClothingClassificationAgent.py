@@ -11,6 +11,10 @@ class ClothingClassificationAgent:
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
         self.loss_fn = nn.CrossEntropyLoss()
         self.epochs = epochs
+        # within 5 epochs if improvement not found, reduce steps by half
+        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+                self.optimizer, mode='max', patience=5, factor=0.5
+                )
 
     def evaluate(self, dataloader):
         self.model.eval() # turn off dropout and batchnorm training behavior
@@ -55,5 +59,6 @@ class ClothingClassificationAgent:
             # after all batches, check validation loss
             val_labels, val_preds = self.evaluate(val_loader)
             val_acc = accuracy_score(val_labels, val_preds)
+            self.scheduler.step(val_acc) # scheduler steps w/new val_acc info
             print(f"epoch {epoch+1}/{self.epochs} — val_acc: {val_acc:.3f}")
             self.model.train()  # switch back to train mode after evaluate
