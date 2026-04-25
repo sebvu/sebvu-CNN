@@ -2,17 +2,18 @@ import pandas as pd
 from ClothingDataset import ClothingDataset
 from torch.utils.data import DataLoader
 from ClothingClassificationAgent import ClothingClassificationAgent
-from dataVisualization import displayResults
+from dataInterpretation import interpretResults
+from filePaths import DATA_CSV_PATH, MODELS_PATH
 
 def main():
     # hyprparameters
-    EPOCHS = 60
+    EPOCHS = 3
     LEARNING_RATE = 0.0001
     BATCH_SIZE=32
     KERNEL_SIZE=3
     ###
 
-    df = pd.read_csv("data/images.csv") # training data
+    df = pd.read_csv(DATA_CSV_PATH) # training data
     df = df[df["label"] != "Not sure"] # filter out the "Not sure" label
     df = df.sample(frac=1, random_state=42).reset_index(drop=True) # shuffle
 
@@ -37,17 +38,17 @@ def main():
     train_dataset_noaug = ClothingDataset(train_df, labels, is_augmented=False)
     train_loader_noaug = DataLoader(train_dataset_noaug, batch_size=BATCH_SIZE, shuffle=True)
 
-    # not_deep_noaug
+    # # not_deep_noaug
     CC_not_deep_noaug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=False) 
-    CC_not_deep_noaug.train(train_loader_noaug, val_loader)
+    CC_not_deep_noaug.train(train_loader_noaug, val_loader, save_path=f"{MODELS_PATH}not_deep_noaug/")
     true_labels_not_deep_noaug, predictions_not_deep_noaug = CC_not_deep_noaug.evaluate(test_loader)
-    displayResults(true_labels_not_deep_noaug, predictions_not_deep_noaug, test_dataset, test_name="not_deep_noaug")
-
+    interpretResults(true_labels_not_deep_noaug, predictions_not_deep_noaug, test_dataset, test_name="not_deep_noaug", save_only_if_better=True)
+    
     # deep_noaug
     CC_deep_noaug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=True)
-    CC_deep_noaug.train(train_loader_noaug, val_loader)
+    CC_deep_noaug.train(train_loader_noaug, val_loader, save_path=f"{MODELS_PATH}deep_noaug/")
     true_labels_deep_noaug, predictions_deep_noaug = CC_deep_noaug.evaluate(test_loader)
-    displayResults(true_labels_deep_noaug, predictions_deep_noaug, test_dataset, test_name="deep_noaug")
+    interpretResults(true_labels_deep_noaug, predictions_deep_noaug, test_dataset, test_name="deep_noaug")
 
     # augmentation
     train_dataset_aug = ClothingDataset(train_df, labels, is_augmented=True)
@@ -55,15 +56,15 @@ def main():
 
     # not_deep_aug
     CC_not_deep_aug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=False)
-    CC_not_deep_aug.train(train_loader_aug, val_loader)
+    CC_not_deep_aug.train(train_loader_aug, val_loader, save_path=f"{MODELS_PATH}not_deep_aug/")
     true_labels_not_deep_aug, predictions_not_deep_aug = CC_not_deep_aug.evaluate(test_loader)
-    displayResults(true_labels_not_deep_aug, predictions_not_deep_aug, test_dataset, test_name="not_deep_aug")
+    interpretResults(true_labels_not_deep_aug, predictions_not_deep_aug, test_dataset, test_name="not_deep_aug")
 
     # deep_aug
     CC_deep_aug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=True)
-    CC_deep_aug.train(train_loader_aug, val_loader)
+    CC_deep_aug.train(train_loader_aug, val_loader, save_path=f"{MODELS_PATH}deep_aug/")
     true_labels_deep_aug, predictions_deep_aug = CC_deep_aug.evaluate(test_loader)
-    displayResults(true_labels_deep_aug, predictions_deep_aug, test_dataset, test_name="deep_aug")
+    interpretResults(true_labels_deep_aug, predictions_deep_aug, test_dataset, test_name="deep_aug")
 
 if __name__=="__main__":
     main()

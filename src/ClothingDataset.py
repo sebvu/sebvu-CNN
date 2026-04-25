@@ -1,4 +1,5 @@
-from torchvision import transforms
+import torch
+from torchvision.transforms import v2
 from torch.utils.data import Dataset 
 from PIL import Image
 
@@ -8,23 +9,29 @@ class ClothingDataset(Dataset):
         self.labels = labels
 
         if not is_augmented: 
-            self.transform = transforms.Compose([
-                transforms.Resize((128, 128)), 
-                transforms.ToTensor(), 
-                transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))])
+            self.transform = v2.Compose([
+                v2.Resize((128, 128)), 
+                v2.ToImage(),
+                v2.ToDtype(torch.float32, scale=True),
+                # v2.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+                ])
         else:
-            self.transform = transforms.Compose([
+            self.transform = v2.Compose([
                 # resize all images to 128x128, dataset images may have varied resolutions and the networks expects a fixed resolution
-                transforms.Resize((128, 128)), 
+                v2.Resize((128, 128)), 
                 # random augmentations for training
-                transforms.RandomRotation(45),
-                transforms.RandomHorizontalFlip(),
+                v2.RandomRotation(degrees=[-45, 45]),
+                v2.RandomHorizontalFlip(p=0.5),
+                v2.RandomGrayscale(p=0.5),
+                v2.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.)),
                 # covert PIL image to python tensor shape of [3, 128, 128]. rescale pixel values from 0-255 int to 0-1 floats
                 # channel ordered as [R, G, B]
-                transforms.ToTensor(), 
+                v2.ToImage(),
+                v2.ToDtype(torch.float32, scale=True),
                 # normalize using mean=0.5, std=0.5
-                # zero-centered -1 > 1 data trains more stably
-                transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))])
+                # zero-centered -1 > 1 model ignores scale through normalization and looks for patterns only
+                # v2.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+                ])
 
     def __len__(self) -> int:
         return len(self.df)

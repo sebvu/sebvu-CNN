@@ -31,7 +31,7 @@ class ClothingClassificationAgent:
         return all_labels, all_preds
 
 
-    def train(self, dataloader: DataLoader, val_loader: DataLoader) -> None:
+    def train(self, dataloader: DataLoader, val_loader: DataLoader, save_path = None) -> None:
         for epoch in range(self.epochs):
             for X_batch, y_batch in dataloader:
                 # X_batch is the 4D input of the image tensors that were transformed
