@@ -5,8 +5,16 @@ from ClothingClassificationAgent import ClothingClassificationAgent
 from dataVisualization import displayResults
 
 def main():
+    # hyprparameters
+    EPOCHS = 20
+    LEARNING_RATE = 0.0001
+    BATCH_SIZE=16
+    KERNEL_SIZE=5
+    ###
+
     df = pd.read_csv("data/images.csv") # training data
     df = df.sample(frac=1, random_state=42).reset_index(drop=True) # shuffle
+
     labels = { # create the labels associated w/ids
             label: index
             for index, label in enumerate(dict.fromkeys(df["label"]))
@@ -20,41 +28,38 @@ def main():
     val_dataset = ClothingDataset(val_df, labels)
     test_dataset = ClothingDataset(test_df, labels)
     
-    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-    # hyprparameters
-    epochs = 20
-    learning_rate = 0.0001
 
     # no augmentation
     train_dataset_noaug = ClothingDataset(train_df, labels, is_augmented=False)
-    train_loader_noaug = DataLoader(train_dataset_noaug, batch_size=32, shuffle=True)
+    train_loader_noaug = DataLoader(train_dataset_noaug, batch_size=BATCH_SIZE, shuffle=True)
 
-    # not_deep 
-    CC_not_deep_noaug = ClothingClassificationAgent(epochs, learning_rate, is_deep=False) 
+    # not_deep_noaug
+    CC_not_deep_noaug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=False) 
     CC_not_deep_noaug.train(train_loader_noaug, val_loader)
     true_labels_not_deep, predictions_not_deep = CC_not_deep_noaug.evaluate(test_loader)
     displayResults(true_labels_not_deep, predictions_not_deep, test_dataset)
 
-    # deep
-    CC_deep_noaug = ClothingClassificationAgent(epochs, learning_rate, is_deep=True)
+    # deep_noaug
+    CC_deep_noaug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=True)
     CC_deep_noaug.train(train_loader_noaug, val_loader)
     true_labels_deep, predictions_deep = CC_deep_noaug.evaluate(test_loader)
     displayResults(true_labels_deep, predictions_deep, test_dataset)
 
     # augmentation
     train_dataset_aug = ClothingDataset(train_df, labels, is_augmented=True)
-    train_loader_aug = DataLoader(train_dataset_aug, batch_size=32, shuffle=True)
+    train_loader_aug = DataLoader(train_dataset_aug, batch_size=BATCH_SIZE, shuffle=True)
 
-    # not_deep 
-    CC_not_deep_aug = ClothingClassificationAgent(epochs, learning_rate, is_deep=False)
+    # not_deep_aug
+    CC_not_deep_aug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=False)
     CC_not_deep_aug.train(train_loader_aug, val_loader)
     true_labels_not_deep, predictions_not_deep = CC_not_deep_aug.evaluate(test_loader)
     displayResults(true_labels_not_deep, predictions_not_deep, test_dataset)
 
-    # deep
-    CC_deep_aug = ClothingClassificationAgent(epochs, learning_rate, is_deep=True)
+    # deep_aug
+    CC_deep_aug = ClothingClassificationAgent(EPOCHS, LEARNING_RATE, KERNEL_SIZE, is_deep=True)
     CC_deep_aug.train(train_loader_aug, val_loader)
     true_labels_deep, predictions_deep = CC_deep_aug.evaluate(test_loader)
     displayResults(true_labels_deep, predictions_deep, test_dataset)

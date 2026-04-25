@@ -6,8 +6,8 @@ from sklearn.metrics import accuracy_score
 from CNNModel import CNNModel
 
 class ClothingClassificationAgent:
-    def __init__(self, epochs: int, learning_rate: float, is_deep: bool = False):
-        self.model = CNNModel(is_deep)
+    def __init__(self, epochs: int, learning_rate: float, kernel_size, is_deep: bool = False):
+        self.model = CNNModel(kernel_size, is_deep)
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
         self.loss_fn = nn.CrossEntropyLoss()
         self.epochs = epochs
