@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.optim as optim
 import pandas as pd
@@ -8,9 +9,23 @@ from PIL import Image
 class ClothingClassificationAgent(nn.Module):
     def __init__(self):
         super().__init__()
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
+        self.bn1 = nn.BatchNorm2d(32)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        self.bn2 = nn.BatchNorm2d(64)
+        self.pool = nn.MaxPool2d(2)
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Linear(64 * 32 * 32, 128)
+        self.dropout = nn.Dropout(0.3)
+        self.fc2 = nn.Linear(128, 10)
 
     def forward(self, x):
-        return # insert forward here
+        # softmax is implicitly activated on the output via CrossEntropyLoss
+        x = self.pool(nn.functional.relu(self.bn1(self.conv1(x))))
+        x = self.pool(nn.functional.relu(self.bn2(self.conv2(x))))
+        x = self.flatten(x)
+        x = self.dropout(nn.functional.relu(self.fc1(x)))
+        return self.fc2(x)
 
 class ClothingDataset(Dataset):
     def __init__(self, df):
@@ -66,13 +81,18 @@ class Trainer:
                 loss = self.loss_fn(y_hat, y_batch)
 
                 # zero the gradients to prevent gradients from stacking on top of each other self.optimizer.zero_grad(DataLoadeDataLoaderr)
+                self.optimizer.zero_grad()
+
                 # walks backward through every operation that produced that loss
                 # calculates a gradient for every single param
                 loss.backward()
 
                 # looks at the gradients loss.backward() produces, then shoves
                 # the parameters to the direction of least loss
-                self.optimizer.step()
+                with torch.no_grad():
+                    self.optimizer.step()
+
+                print(f"epoch: {epoch}, loss: {loss}")
 
 def main():
     df = pd.read_csv("data/images.csv")
