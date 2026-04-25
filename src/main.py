@@ -5,6 +5,8 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from PIL import Image
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 
 class ClothingClassificationAgent(nn.Module):
     def __init__(self):
@@ -28,12 +30,9 @@ class ClothingClassificationAgent(nn.Module):
         return self.fc2(x)
 
 class ClothingDataset(Dataset):
-    def __init__(self, df):
+    def __init__(self, df, labels):
         self.df = df
-        self.labels = {
-                label: index
-                for index, label in enumerate(dict.fromkeys(df["label"]))
-        }
+        self.labels = labels
         self.transform = transforms.Compose([
             # resize all images to 128x127, dataset images may have varied resolutions and the networks expects a fixed resolution
             transforms.Resize((128, 128)), 
@@ -66,6 +65,21 @@ class Trainer:
         self.loss_fn = nn.CrossEntropyLoss()
         self.epochs = epochs
 
+    def evaluate(self, dataloader):
+        self.model.eval() # turn off dropout and batchnorm training behavior
+        all_preds = [] # predictions 
+        all_labels = []
+
+        with torch.no_grad(): # no gradient tracking
+            for X_batch, y_batch in dataloader:
+                y_hat = self.model(X_batch)
+                preds = y_hat.argmax(dim=1)
+                all_preds.extend(preds.tolist())
+                all_labels.extend(y_batch.tolist())
+
+        return all_labels, all_preds
+
+
     def train(self, dataloader: DataLoader) -> None:
         for epoch in range(self.epochs):
             for X_batch, y_batch in dataloader:
@@ -89,19 +103,47 @@ class Trainer:
 
                 # looks at the gradients loss.backward() produces, then shoves
                 # the parameters to the direction of least loss
-                with torch.no_grad():
-                    self.optimizer.step()
+                self.optimizer.step()
 
-                print(f"epoch: {epoch}, loss: {loss}")
+            # after all batches, check validation loss
+            val_labels, val_preds = self.evaluate(dataloader)
+            val_acc = accuracy_score(val_labels, val_preds)
+            print(f"epoch {epoch+1}/{self.epochs} — val_acc: {val_acc:.3f}")
+            self.model.train()  # switch back to train mode after evaluate
 
 def main():
-    df = pd.read_csv("data/images.csv")
+    df = pd.read_csv("data/images.csv") # training data
+    df = df.sample(frac=1, random_state=42).reset_index(drop=True) # shuffle
+    labels = { # create the labels associated w/ids
+            label: index
+            for index, label in enumerate(dict.fromkeys(df["label"]))
+    }
 
-    dataset = ClothingDataset(df)
-    dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
-    trainer = Trainer(20, 0.001)
-    trainer.train(dataloader)
+    n = len(df) # split 70% train, 15% validation, 15% test
+    train_df = df.iloc[:int(0.7 * n)]
+    val_df = df.iloc[int(0.7 * n):int(0.85 * n)]
+    test_df = df.iloc[int(0.85 * n):]
 
+    train_dataset = ClothingDataset(train_df, labels)
+    val_dataset = ClothingDataset(val_df, labels)
+    test_dataset = ClothingDataset(test_df, labels)
+    
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+
+    trainer = Trainer(50, 0.001) # instantiate model trainer, and train
+
+    trainer.train(train_loader)
+
+    true_labels, predictions = trainer.evaluate(test_loader)
+
+    print(f"accuracy: {accuracy_score(true_labels, predictions):.3f}")
+    print(classification_report(true_labels, predictions, target_names=list(test_dataset.labels.keys())))
+
+    cm = confusion_matrix(true_labels, predictions)
+    ConfusionMatrixDisplay(cm, display_labels=list(test_dataset.labels.keys())).plot()
+    plt.show()
 
 
 if __name__=="__main__":
