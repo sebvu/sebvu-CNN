@@ -38,7 +38,7 @@ def interpretResults(agent, test_dataset, test_loader, *, test_name="model", sav
     # create confusion matrix w/data
     cm = confusion_matrix(true_labels, predictions)
     disp = ConfusionMatrixDisplay(cm, display_labels=list(test_dataset.labels.keys()))
-    disp.plot(xticks_rotation=45)
+    disp.plot()
     plt.tight_layout()
 
     if display_confusion_matrix: # display confusion matrix at the end of model training
