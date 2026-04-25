@@ -60,5 +60,7 @@ class ClothingClassificationAgent:
             val_labels, val_preds = self.evaluate(val_loader)
             val_acc = accuracy_score(val_labels, val_preds)
             self.scheduler.step(val_acc) # scheduler steps w/new val_acc info
-            print(f"epoch {epoch+1}/{self.epochs} — val_acc: {val_acc:.3f}")
+            current_lr = self.optimizer.param_groups[0]['lr']
+            print(f"epoch {epoch+1}/{self.epochs} — val_acc: {val_acc:.3f} — lr: {current_lr:.6f}")
+
             self.model.train()  # switch back to train mode after evaluate
