@@ -42,7 +42,5 @@ def interpretResults(true_labels, predictions, test_dataset, *, test_name="model
         if new_acc >= old_acc: # rewrite old stuff
             print(f"overwriting old {run_dir}/{txt_path} since accuracy is better this run")
             overwriteModelDataInFolder(new_acc, report, test_name, txt_path, run_dir=run_dir)
-    else:
-        print(f"overwriting old {run_dir}/{txt_path}")
-        overwriteModelDataInFolder(new_acc, report, test_name, txt_path, run_dir=run_dir)
+
     plt.close()
