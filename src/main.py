@@ -8,40 +8,78 @@ from PIL import Image
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
-class ClothingClassificationAgent(nn.Module):
-    def __init__(self):
+class CNNModel(nn.Module):
+    def __init__(self, is_deep):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
-        self.bn1 = nn.BatchNorm2d(32)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.bn2 = nn.BatchNorm2d(64)
-        self.pool = nn.MaxPool2d(2)
-        self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(64 * 32 * 32, 128)
-        self.dropout = nn.Dropout(0.3)
-        self.fc2 = nn.Linear(128, 10)
+
+        self.is_deep = is_deep
+
+        if not self.is_deep:
+            self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
+            self.bn1 = nn.BatchNorm2d(32)
+            self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+            self.bn2 = nn.BatchNorm2d(64)
+            self.pool = nn.MaxPool2d(2)
+            self.flatten = nn.Flatten()
+            self.fc1 = nn.Linear(64 * 32 * 32, 128)
+            self.dropout = nn.Dropout(0.3)
+            self.fc2 = nn.Linear(128, 10)
+        else:
+            self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
+            self.bn1 = nn.BatchNorm2d(32)
+            self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+            self.bn2 = nn.BatchNorm2d(64)
+            self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
+            self.bn3 = nn.BatchNorm2d(128)
+            self.conv4 = nn.Conv2d(128, 256, kernel_size=3, padding=1)
+            self.bn4 = nn.BatchNorm2d(256)
+            self.pool = nn.MaxPool2d(2)
+            self.flatten = nn.Flatten()
+            self.fc1 = nn.Linear(256 * 8 * 8, 128)
+            self.dropout = nn.Dropout(0.3)
+            self.fc2 = nn.Linear(128,10)
 
     def forward(self, x):
         # softmax is implicitly activated on the output via CrossEntropyLoss
-        x = self.pool(nn.functional.relu(self.bn1(self.conv1(x))))
-        x = self.pool(nn.functional.relu(self.bn2(self.conv2(x))))
-        x = self.flatten(x)
-        x = self.dropout(nn.functional.relu(self.fc1(x)))
+        
+        if not self.is_deep:
+            x = self.pool(nn.functional.relu(self.bn1(self.conv1(x))))
+            x = self.pool(nn.functional.relu(self.bn2(self.conv2(x))))
+            x = self.flatten(x)
+            x = self.dropout(nn.functional.relu(self.fc1(x)))
+        else:
+            x = self.pool(nn.functional.relu(self.bn1(self.conv1(x))))
+            x = self.pool(nn.functional.relu(self.bn2(self.conv2(x))))
+            x = self.pool(nn.functional.relu(self.bn3(self.conv3(x))))
+            x = self.pool(nn.functional.relu(self.bn4(self.conv4(x))))
+            x = self.flatten(x)
+            x = self.dropout(nn.functional.relu(self.fc1(x)))
         return self.fc2(x)
 
+
 class ClothingDataset(Dataset):
-    def __init__(self, df, labels):
+    def __init__(self, df, labels, is_training: bool = False):
         self.df = df
         self.labels = labels
-        self.transform = transforms.Compose([
-            # resize all images to 128x127, dataset images may have varied resolutions and the networks expects a fixed resolution
-            transforms.Resize((128, 128)), 
-            # covert PIL image to python tensor shape of [3, 128, 128]. rescale pixel values from 0-255 int to 0-1 floats
-            # channel ordered as [R, G, B]
-            transforms.ToTensor(), 
-            # normalize using mean=0.5, std=0.5
-            # zero-centered -1 > 1 data trains more stably
-            transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))])
+
+        if not is_training: 
+            self.transform = transforms.Compose([
+                transforms.Resize((128, 128)), 
+                transforms.ToTensor(), 
+                transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))])
+        else:
+            self.transform = transforms.Compose([
+                # resize all images to 128x128, dataset images may have varied resolutions and the networks expects a fixed resolution
+                transforms.Resize((128, 128)), 
+                # random augmentations for training
+                transforms.RandomRotation(45),
+                transforms.RandomHorizontalFlip(),
+                # covert PIL image to python tensor shape of [3, 128, 128]. rescale pixel values from 0-255 int to 0-1 floats
+                # channel ordered as [R, G, B]
+                transforms.ToTensor(), 
+                # normalize using mean=0.5, std=0.5
+                # zero-centered -1 > 1 data trains more stably
+                transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))])
 
 
     def __len__(self) -> int:
@@ -58,9 +96,9 @@ class ClothingDataset(Dataset):
 
         return (img_normalized_tensor, self.labels[row_label])
 
-class Trainer:
-    def __init__(self, epochs: int, learning_rate: float):
-        self.model = ClothingClassificationAgent()
+class ClothingClassificationAgent:
+    def __init__(self, epochs: int, learning_rate: float, is_deep: bool = False):
+        self.model = CNNModel(is_deep)
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
         self.loss_fn = nn.CrossEntropyLoss()
         self.epochs = epochs
@@ -111,6 +149,15 @@ class Trainer:
             print(f"epoch {epoch+1}/{self.epochs} — val_acc: {val_acc:.3f}")
             self.model.train()  # switch back to train mode after evaluate
 
+def displayResults(true_labels, predictions, test_dataset):
+    print(f"accuracy: {accuracy_score(true_labels, predictions):.3f}")
+    print(classification_report(true_labels, predictions, target_names=list(test_dataset.labels.keys())))
+
+    cm = confusion_matrix(true_labels, predictions)
+    ConfusionMatrixDisplay(cm, display_labels=list(test_dataset.labels.keys())).plot()
+    plt.show()
+
+
 def main():
     df = pd.read_csv("data/images.csv") # training data
     df = df.sample(frac=1, random_state=42).reset_index(drop=True) # shuffle
@@ -132,18 +179,21 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
-    trainer = Trainer(50, 0.0001) # instantiate model trainer, and train
+    # hyprparameters
+    epochs = 20
+    learning_rate = 0.0001
 
-    trainer.train(train_loader, val_loader)
+    # not_deep training set
+    CC_not_deep = ClothingClassificationAgent(epochs, learning_rate) # instantiate model trainer, and train
+    CC_not_deep.train(train_loader, val_loader)
+    true_labels_not_deep, predictions_not_deep = CC_not_deep.evaluate(test_loader)
+    displayResults(true_labels_not_deep, predictions_not_deep, test_dataset)
 
-    true_labels, predictions = trainer.evaluate(test_loader)
-
-    print(f"accuracy: {accuracy_score(true_labels, predictions):.3f}")
-    print(classification_report(true_labels, predictions, target_names=list(test_dataset.labels.keys())))
-
-    cm = confusion_matrix(true_labels, predictions)
-    ConfusionMatrixDisplay(cm, display_labels=list(test_dataset.labels.keys())).plot()
-    plt.show()
+    # deep w/augmentations
+    CC_deep = ClothingClassificationAgent(epochs, learning_rate, True)
+    CC_deep.train(train_loader, val_loader)
+    true_labels_deep, predictions_deep = CC_deep.evaluate(test_loader)
+    displayResults(true_labels_deep, predictions_deep, test_dataset)
 
 
 if __name__=="__main__":
