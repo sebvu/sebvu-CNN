@@ -6,7 +6,7 @@ from sklearn.metrics import accuracy_score
 from CNNModel import CNNModel
 
 class ClothingClassificationAgent:
-    def __init__(self, epochs: int, learning_rate: float, kernel_size, *, is_deep: bool = False, device: None):
+    def __init__(self, epochs: int, learning_rate: float, kernel_size, *, is_deep: bool = False, device = None):
         self.device = device or torch.device("cpu") # cuda if available, else just use cpu
         self.model = CNNModel(kernel_size, is_deep).to(self.device) # move model to device
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)

@@ -15,6 +15,10 @@ endif
 run:
 	$(SET_PYTHONPATH) $(PYTHON) -m main
 
+# Evaluate a chosen model
+eval:
+	$(SET_PYTHONPATH) $(PYTHON) -m load-model
+
 # Install dependencies
 install:
 	$(PYTHON) -m pip install -r requirements.txt
