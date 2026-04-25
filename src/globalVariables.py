@@ -2,7 +2,7 @@ import torch
 
 # global variables
 
-DATA_CSV_PATH="data/images.csv"
+DATA_CSV_PATH="data-subset/images.csv"
 MODELS_PATH="models/"
 
 # hyprparameters
