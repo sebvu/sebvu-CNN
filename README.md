@@ -73,5 +73,8 @@ KERNEL_SIZE=3
 EVAL_MODELS_PATH=os.path.join(os.getcwd(), "models") # change "models" to "example-models" to try the provided example models during eval
 ```
 
-Once these have been generated, you can then run `make eval` to test those models out directly and have the results outputted to console.
+Once training has finished, they will end up in a `models/` folder. You can now run `make eval`, select your model, and see it evaluated against the test set!
+
+If you want to run the **example-models**, simply go to `src/globalVariables.py` and change EVAL_MODELS_PATH "models" to "example-models".
+
 
