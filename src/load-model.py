@@ -34,7 +34,7 @@ def main():
     ### model successfully selected ###
 
     model_dir_name = dirs[modelID]
-    dir_path = os.path.join(os.getcwd(), "models", model_dir_name)
+    dir_path = os.path.join(EVAL_MODELS_PATH, model_dir_name)
     arch_path = os.path.join(dir_path, f"{model_dir_name}_architecture.txt")
     model_path = os.path.join(dir_path, f"{model_dir_name}_model.pt")
 
