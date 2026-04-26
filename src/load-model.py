@@ -3,7 +3,7 @@ import os
 import pandas as pd
 from dataInterpretation import interpretResults
 from ClothingClassificationAgent import ClothingClassificationAgent
-from globalVariables import EPOCHS, LEARNING_RATE, DEVICE, DATA_CSV_PATH, BATCH_SIZE
+from globalVariables import EPOCHS, LEARNING_RATE, DEVICE, DATA_CSV_PATH, BATCH_SIZE, EVAL_MODELS_PATH
 from ClothingDataset import ClothingDataset
 from torch.utils.data import DataLoader
 
@@ -14,7 +14,7 @@ def main():
     """
     dirs = {
             index: label
-            for index, label in enumerate(os.listdir(os.path.join(os.getcwd(), "models")))
+            for index, label in enumerate(os.listdir(EVAL_MODELS_PATH))
     }
     modelID = -1 # default
     dirsLen = int(len(dirs))

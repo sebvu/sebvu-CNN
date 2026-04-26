@@ -1,0 +1,18 @@
+accuracy: 0.547
+
+              precision    recall  f1-score   support
+
+     T-Shirt       0.80      0.47      0.59        17
+         Hat       0.64      0.60      0.62        15
+       Dress       0.65      0.61      0.63        18
+     Outwear       0.25      0.38      0.30         8
+      Shorts       0.79      0.69      0.73        16
+       Pants       0.81      0.93      0.87        14
+  Longsleeve       0.33      0.18      0.23        17
+       Shoes       0.53      0.89      0.67         9
+       Shirt       0.39      0.50      0.44        18
+    Not sure       0.35      0.39      0.37        18
+
+    accuracy                           0.55       150
+   macro avg       0.55      0.56      0.54       150
+weighted avg       0.56      0.55      0.54       150
