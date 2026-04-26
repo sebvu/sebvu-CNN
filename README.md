@@ -2,9 +2,35 @@
 
 This project is a demonstration of building, training and evaluating a Convolutional Neural Network for classifying clothing images, as well as saving and testing those models on a test dataset. It compares using deeper CNN with 2 vs 4 convolutional layers, and utilizing augmentation.
 
-## Sourced Data
+COSC4368 @ UH
 
-This project sources its data from [clothing-dataset-small](https://github.com/alexeygrigorev/clothing-dataset-small) from [alexeygrigorev](https://github.com/alexeygrigorev). All credits for sourcing the images go to him and contributors.
+## Information
+
+This project sources its data from [clothing-dataset-small](https://github.com/alexeygrigorev/clothing-dataset-small) from [alexeygrigorev](https://github.com/alexeygrigorev). All credits for sourcing the images go to him and contributors. 
+
+There are 10 categories
+
+- T-shirt
+- Hat
+- Dresse
+- Outwear
+- Shorts
+- Pants
+- Longsleeve
+- Shoes
+- Shirt
+- Not sure (this is project-optional, but included for fun)
+
+Each category *should* store up to 100 images each, making up **1000** images total.
+
+The project data is split into the following divisions.
+
+```python
+n = len(df) # split 70% train, 15% validation, 15% test
+train_df = df.iloc[:int(0.7 * n)]
+val_df = df.iloc[int(0.7 * n):int(0.85 * n)]
+test_df = df.iloc[int(0.85 * n):]
+```
 
 ## Dependencies
 
@@ -36,6 +62,8 @@ where
 - aug means the training data has been augmented/transformed
 
 Look at `src/globalVariables.py` for hyrprparameters to change.
+
+Once you have decided your hyprparameters, simply run `make run` to start training.
  
 ```python
 EPOCHS = 60
