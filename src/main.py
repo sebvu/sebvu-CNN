@@ -43,6 +43,21 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
+    """
+        4 models are generated from the training below with their respective comments. The overall pipeline:
+        - ClothingClassificationAgent obj is created w/hyprparameters. Acts as a wrapper that stores the CNNModel itself,
+            and the training methods to actually train the model.
+        - Model is then trained, please refer to ClothingClassificationAgent.py, def train(self, ......) to see training process.
+            During training, you will be able to see the accuracy_score against the validation dataset.
+        - InterpretResult will print out a summary utilizing sklearn.metrics, as well as a confusion matrix. It will also save your models
+            in the appropriate models/ folder.
+
+        These steps are repeated for all 4 models, with slightly different settings.
+        - augmentation: ClothingDataset is passed with is_augmented=False, or True. Please refer to ClothingDataset.py to see the different transformations to the image utilizing torchvision.
+        - is_deep: ClothingClassificationAgent is passed with is_deep=False, or True. This propogates down to CNNModel on how layers are defined. is_deep=True will create 4 conv layers, while is_deep=False will produce 2.
+            Please refer to CNNModel.py to see how the layers are made.
+    """
+
     # no augmentation
     train_dataset_noaug = ClothingDataset(train_df, labels, is_augmented=False)
     train_loader_noaug = DataLoader(train_dataset_noaug, batch_size=BATCH_SIZE, shuffle=True)

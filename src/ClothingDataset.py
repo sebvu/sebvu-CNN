@@ -8,6 +8,9 @@ class ClothingDataset(Dataset):
         self.df = df
         self.labels = labels
 
+        """
+            Augmentation techniques applied to Dataset will only be applied if the is_augmented flag is true. These are only true for the models that require is_augmented.
+        """
         if not is_augmented: 
             self.transform = v2.Compose([
                 v2.Resize((128, 128)), 

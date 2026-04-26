@@ -8,6 +8,10 @@ class CNNModel(nn.Module):
         self.kernel_size = kernel_size
         self.padding = self.kernel_size // 2 # general rule to preserve correct padding
 
+        """
+            is_deep will define how many conv layers are created. By default it will only be 2, but for deeper CNN architectures, 4.
+        """
+
         if not self.is_deep:
             self.conv1 = nn.Conv2d(3, 32, kernel_size=self.kernel_size, padding=self.padding)
             self.bn1 = nn.BatchNorm2d(32)
@@ -34,7 +38,7 @@ class CNNModel(nn.Module):
             self.fc2 = nn.Linear(128,10)
 
     def forward(self, x):
-        # softmax is implicitly activated on the output via CrossEntropyLoss
+        # softmax is implicitly activated on the output via CrossEntropyLoss, so no need to explicitly do it
         
         if not self.is_deep:
             x = self.pool(nn.functional.relu(self.bn1(self.conv1(x))))
