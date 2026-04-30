@@ -6,7 +6,7 @@ EPOCHS = 60
 LEARNING_RATE = 0.0001
 BATCH_SIZE=32
 KERNEL_SIZE=3
-EVAL_MODELS_PATH=os.path.join(os.getcwd(), "example-models") # change "models" to "example-models" to try the provided example models during eval
+EVAL_MODELS_PATH=os.path.join(os.getcwd(), "models") # change "models" to "example-models" to try the provided example models during eval
 
 ### DO NOT TOUCH BELOW ###
 
